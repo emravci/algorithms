@@ -4,10 +4,11 @@
 #include <queue>
 #include <algorithm>
 #include <fstream>
+#include <list>
 
 struct Symbol
 {
-	std::vector<std::size_t> symbols;
+	std::list<std::size_t> symbols;
 	double f;
 	bool operator()(const Symbol& lhs, const Symbol& rhs)
 	{	// this function is intended for min-heap data structure
@@ -23,23 +24,23 @@ struct Symbol
 };
 
 std::pair<std::size_t, std::size_t> huffman(const std::vector<Symbol>& f)
-{	// computes minimum and maximum length of huffman encoding
+{	// computes minimum and maximum lengths of huffman coding
 	std::priority_queue<Symbol, std::vector<Symbol>, Symbol> q(f.begin(), f.end());
 	std::vector<std::size_t> length(f.size(), 0);
 	while(q.size() != 1)
 	{
-		// get the two with minimum freq
+		// get the two with minimum freq or weight
 		Symbol a = q.top();		q.pop();
 		Symbol b = q.top();		q.pop();
 		// combine them into single one and push
 		Symbol ab;
 		ab.f = a.f + b.f;
-		ab.symbols.insert(ab.symbols.end(), a.symbols.begin(), a.symbols.end());
-		ab.symbols.insert(ab.symbols.end(), b.symbols.begin(), b.symbols.end());
-		q.push(ab);
+		// the following works in O(1) time due the nature of std::list
+		ab.symbols.splice(ab.symbols.end(), a.symbols);
+		ab.symbols.splice(ab.symbols.end(), b.symbols);
 		// increase length of each symbol by one
-		a.increment(length);
-		b.increment(length);
+		ab.increment(length);
+		q.push(ab);
 	}
 	// return min and max of lengths
 	auto [min, max] = std::minmax_element(length.begin(), length.end());
@@ -60,7 +61,7 @@ int main()
 		file >> w;
 		s[i] = {{i}, w};
 	}
-	// compute average length
+	// compute min and max lengths
 	auto [min, max] = huffman(s);
 	std::cout << "Min=" << min << " Max=" << max << "\n";
 	return 0;
