@@ -48,7 +48,6 @@ int main()
 	std::ifstream file("edges.txt");
 	std::size_t V = 0, E = 0;
 	file >> V >> E;
-	
 	std::vector<std::vector<Edge>> adj_list(V, std::vector<Edge>());
 	long long u, v, w;
 	for(std::size_t i=0; i<E; ++i)		
