@@ -12,6 +12,9 @@ struct Item
 std::size_t knapsack(const std::size_t W, const std::vector<Item>& items)
 {
 	std::size_t n = items.size();
+	// this dynamic programming problem requires a matrix but 
+	// instead of attempting to create a large matrix that would not fit in memory
+	// two rows of the matrix are created and used throughout the computation
 	// use of pointer to arrays halves the time it takes 
 	// since it gets rid of extensive copy ops at the end of outer loop
 	// call operator initializes arrays to zero
