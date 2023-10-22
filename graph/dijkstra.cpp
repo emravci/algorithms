@@ -52,10 +52,10 @@ int main()
 {
 	// the vertex count is given
 	int V = 200;
-  // file is 1-based
+  	// file is 1-based
 	std::ifstream file("dijkstraData.txt");
 	std::string line;
-  // adjacency list is 0-based
+  	// adjacency list is 0-based
 	std::vector<std::vector<Edge>> adj_list(V, std::vector<Edge>());
 	while(file.eof() == false)
 	{	// each row starts with the tail vertex
