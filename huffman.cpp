@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <fstream>
 #include <list>
+#include <chrono>
 
 struct Symbol
 {
@@ -50,6 +51,7 @@ std::pair<std::size_t, std::size_t> huffman(const std::vector<Symbol>& f)
 
 int main()
 {
+	auto start = std::chrono::high_resolution_clock::now();
 	// read file 
 	std::ifstream file("huffman.txt");
 	std::size_t n = 0;
@@ -64,5 +66,8 @@ int main()
 	// compute min and max lengths
 	auto [min, max] = huffman(s);
 	std::cout << "Min=" << min << " Max=" << max << "\n";
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+	std::cout << "Computed in " << duration.count() << " milliseconds\n";
 	return 0;
 }
