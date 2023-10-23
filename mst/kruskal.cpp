@@ -2,23 +2,43 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include <numeric>
 
 class DisjointSet
 {
 	public:
-	DisjointSet(std::size_t n)	:	_leader(n, -1),		_count{n}		{}
-	std::size_t find(std::size_t i)
+	DisjointSet(std::size_t n)	:	_leader(n),		_count{n},		_rank(n, 0)		
+	{	// at the beginning every node points to itself
+		std::iota(_leader.begin(), _leader.end(), 0);
+	}
+	std::size_t find(std::size_t i) const
 	{	// find the leader of the set containing i
-		return (_leader[i] == -1) ? i : find(_leader[i]);
+		while(_leader[i] != i)
+		{
+			i = _leader[i];
+		}
+		return i;
 	}
 	bool unite(const std::size_t i, const std::size_t j)
-	{	// union i and j so that leader of the set containing j should point i
+	{	// union i and j so that leader of the set with lower rank should point the other
 		const std::size_t leader_i = find(i);
 		const std::size_t leader_j = find(j);
 		if(leader_i != leader_j)
 		{	// when disjoint sets are united, number of clusters decreases by 1
 			--_count;
-			_leader[leader_j] = leader_i;
+			if(_rank[leader_i] > _rank[leader_j])
+			{
+				_leader[leader_j] = leader_i;
+			}
+			else if(_rank[leader_i] < _rank[leader_j])
+			{
+				_leader[leader_i] = leader_j;
+			}
+			else
+			{	// when ranks equal rank of the new leader is increased by 1
+				_leader[leader_j] = leader_i;
+				++_rank[leader_i];
+			}
 			return true;
 		}
 		return false;
@@ -29,6 +49,7 @@ class DisjointSet
 	}
 	private:
 	std::vector<std::size_t> _leader;
+	std::vector<std::size_t> _rank;
 	std::size_t _count;
 };
 
