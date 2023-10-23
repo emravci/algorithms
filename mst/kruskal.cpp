@@ -3,21 +3,29 @@
 #include <algorithm>
 #include <fstream>
 #include <numeric>
+#include <chrono>
 
 class DisjointSet
 {
 	public:
-	DisjointSet(std::size_t n)	:	_leader(n),		_count{n},		_rank(n, 0)		
+	DisjointSet(std::size_t n)	:	_parent(n),		_rank(n, 0),		_count{n}
 	{	// at the beginning every node points to itself
-		std::iota(_leader.begin(), _leader.end(), 0);
+		std::iota(_parent.begin(), _parent.end(), 0);
 	}
-	std::size_t find(std::size_t i) const
+	std::size_t find(std::size_t i)
 	{	// find the leader of the set containing i
-		while(_leader[i] != i)
+		std::size_t leader = i;
+		while(_parent[leader] != leader)
 		{
-			i = _leader[i];
+			leader = _parent[leader];
 		}
-		return i;
+		while(_parent[i] != i)
+		{	// path compression
+			const std::size_t parent_i = _parent[i];
+			_parent[i] = leader;
+			i = parent_i;
+		}		
+		return leader;
 	}
 	bool unite(const std::size_t i, const std::size_t j)
 	{	// union i and j so that leader of the set with lower rank should point the other
@@ -28,19 +36,19 @@ class DisjointSet
 			--_count;
 			if(_rank[leader_i] > _rank[leader_j])
 			{
-				_leader[leader_j] = leader_i;
+				_parent[leader_j] = leader_i;
 			}
 			else if(_rank[leader_i] < _rank[leader_j])
 			{
-				_leader[leader_i] = leader_j;
+				_parent[leader_i] = leader_j;
 			}
 			else
 			{	// when ranks equal rank of the new leader is increased by 1
-				_leader[leader_j] = leader_i;
+				_parent[leader_j] = leader_i;
 				++_rank[leader_i];
 			}
 			return true;
-		}
+		}	// if i and j belong to the same set return false
 		return false;
 	}
 	std::size_t count() const
@@ -48,7 +56,7 @@ class DisjointSet
 		return _count;
 	}
 	private:
-	std::vector<std::size_t> _leader;
+	std::vector<std::size_t> _parent;
 	std::vector<std::size_t> _rank;
 	std::size_t _count;
 };
@@ -83,6 +91,7 @@ long long kruskal(const std::size_t V, std::vector<Edge>& edges)
 
 int main()		
 {
+	auto start = std::chrono::high_resolution_clock::now();
 	// file is 1-based
 	std::ifstream file("edges.txt");
 	std::size_t V = 0, E = 0;
@@ -97,5 +106,8 @@ int main()
 		edges[i] = edge;
 	}
 	std::cout << kruskal(V, edges) << "\n";
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+	std::cout << "Computed in " << duration.count() << " milliseconds\n";
 	return 0;
 }
