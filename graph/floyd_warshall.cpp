@@ -130,6 +130,7 @@ int main()
 		file >> edge.u >> edge.v >> edge.w;
 		edges[i] = edge;
 	}
+	file.close();
 	std::cout << floyd_warshall(V, edges) << "\n";
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
