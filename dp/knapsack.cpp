@@ -51,6 +51,7 @@ int main()
 		file >> item.value >> item.weight;
 		items[i] = item;
 	}
+	file.close();
 	std::cout << knapsack(W, items) << "\n";
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
