@@ -63,6 +63,7 @@ int main()
 		file >> w;
 		s[i] = {{i}, w};
 	}
+	file.close();
 	// compute min and max lengths
 	auto [min, max] = huffman(s);
 	std::cout << "Min=" << min << " Max=" << max << "\n";
