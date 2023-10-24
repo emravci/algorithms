@@ -105,6 +105,7 @@ int main()
 		--edge.v;
 		edges[i] = edge;
 	}
+	file.close();
 	std::cout << kruskal(V, edges) << "\n";
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
