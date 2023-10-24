@@ -56,6 +56,7 @@ int main()
 		adj_list[u - 1].push_back({v - 1, w});
 		adj_list[v - 1].push_back({u - 1, w});
 	}
+	file.close();
 	std::cout << prim(adj_list) << "\n";
 	return 0;
 }
