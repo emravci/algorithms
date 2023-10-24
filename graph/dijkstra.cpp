@@ -72,6 +72,7 @@ int main()
 			adj_list[u - 1].push_back(edge);				
 		}
 	}
+	file.close();
 	// compute shortest path distance from s to t 
 	long long s = 0, t = 6;										
 	std::cout << dijkstra(adj_list, s, t) << "\n";			
