@@ -4,24 +4,22 @@
 #include <vector>
 #include <stack>
 #include <algorithm>
-#include <set>
 #include <chrono>
 
 class Graph
 {
 	public:
-	using nested_vector_type = std::vector<std::vector<std::size_t>>;
 	Graph(std::size_t V)	:	adj_list(V, std::vector<std::size_t>())		{}
 	void add_edge(std::size_t u, std::size_t v)
 	{
 		adj_list[u].push_back(v);
 	}
 	Graph transpose() const;
-	nested_vector_type kosaraju() const;
+	std::vector<std::size_t> kosaraju() const;
 	private:
 	void dfs_pass_one(std::size_t, std::vector<bool>&, std::stack<std::size_t>&) const;
-	void dfs_pass_two(std::size_t, std::vector<bool>&, std::vector<std::size_t>&) const;
-	nested_vector_type adj_list;
+	void dfs_pass_two(std::size_t, std::vector<std::size_t>&, const std::size_t) const;
+	std::vector<std::vector<std::size_t>> adj_list;
 };
 
 Graph Graph::transpose() const
@@ -51,7 +49,7 @@ void Graph::dfs_pass_one(std::size_t vertex, std::vector<bool>& visited, std::st
 	stack.push(vertex);
 }
 
-void Graph::dfs_pass_two(std::size_t vertex, std::vector<bool>& visited, std::vector<std::size_t>& scc) const
+void Graph::dfs_pass_two(std::size_t vertex, std::vector<std::size_t>& scc_id, const std::size_t ID) const
 {	// iterative depth-first-search algorithm
 	std::stack<std::size_t> stack;
 	stack.push(vertex);
@@ -59,14 +57,13 @@ void Graph::dfs_pass_two(std::size_t vertex, std::vector<bool>& visited, std::ve
 	{
 		std::size_t current = stack.top();
 		stack.pop();
-		if(visited[current] == false)
-		{
-			visited[current] = true;
-			scc.push_back(current);
+		if(scc_id[current] == 0)
+		{	// id = 0 refers to unvisited nodes
+			scc_id[current] = ID;
 			for(auto& neighbour : adj_list[current])
 			{
-				if(visited[neighbour] == false)
-				{
+				if(scc_id[neighbour] == 0)
+				{	// id = 0 refers to unvisited nodes
 					stack.push(neighbour);
 				}
 			}
@@ -74,7 +71,7 @@ void Graph::dfs_pass_two(std::size_t vertex, std::vector<bool>& visited, std::ve
 	}
 }
 
-Graph::nested_vector_type Graph::kosaraju() const
+std::vector<std::size_t> Graph::kosaraju() const
 {	// kosaraju algorithm to compute strongly connected components in O(m + n) time 
 	const std::size_t V = this->adj_list.size();
 	std::vector<bool> visited(V, false);
@@ -91,20 +88,21 @@ Graph::nested_vector_type Graph::kosaraju() const
 	// stack is used to make sure that second dfs runs in decreasing order 
 	// with respect to finishing times of vertices during first dfs
 	Graph reversed = this->transpose();
-	std::fill(visited.begin(), visited.end(), false);
-	Graph::nested_vector_type strongly_connected_components;
+	// initilize vector with 0
+	std::vector<std::size_t> strongly_connected_components_id(V, 0);
+	// any node part of any strongly connected components must have a value greater than 0
+	// in other words 0 refers to unvisited nodes
+	std::size_t ID = 0;
 	while(stack.empty() == false) 
 	{
 		std::size_t v = stack.top();
 		stack.pop();
-		if(visited[v] == false)
+		if(strongly_connected_components_id[v] == 0)
 		{
-			std::vector<std::size_t> scc;
-			reversed.dfs_pass_two(v, visited, scc);
-			strongly_connected_components.push_back(scc);
+			reversed.dfs_pass_two(v, strongly_connected_components_id, ++ID);
 		}
 	}
-	return strongly_connected_components;
+	return strongly_connected_components_id;
 }
 
 struct Clause
@@ -122,25 +120,20 @@ bool is_2satisfiable(const std::size_t N, const std::vector<Clause>& clauses)
 	// there are N variables and
 	// there needs to be two nodes for each variable (one for 'x' and one for 'not x')
 	// even entries (0, 2, 4,..) represents 'x'; whereas odd represents 'not x'
-	Graph graph(2 * N);
 	// create a graph of 2SAT problem
-	// (a v b) is equivalent to (-a -> b) and (-b -> a)
+	Graph graph(2 * N);	
 	for(auto& clause : clauses)
-	{
+	{	// (a v b) is equivalent to (-a -> b) and (-b -> a)
 		graph.add_edge(Clause::map(-clause.x), Clause::map(clause.y));
 		graph.add_edge(Clause::map(-clause.y), Clause::map(clause.x));
 	}
-	// solve SCC problem
-	auto SCCs = graph.kosaraju();
-	// no 'x' and 'not x' should not be in the same graph 
-	for(auto& SCC : SCCs)
-	{	// use of set instead of bool vector improved the performance 20%
-		// use of unordered set did not help any more than 20%
-		std::set<std::size_t> included;
-		for(auto& comp : SCC)
-		{	// check complement of a variable exists in the same SCC
-			if(included.contains(comp / 2) == true)     return false;
-			else                                        included.insert(comp / 2);
+	// kosaraju function will return SCC ID's of individual nodes
+	auto SCC_IDs = graph.kosaraju();
+	for(std::size_t i=0; i<N; ++i)
+	{	// if two consecutive nodes share the same ID, meaning, same SCC, it is unsat
+		if(SCC_IDs[i] == SCC_IDs[i + 1])
+		{
+			return false;
 		}
 	}
 	return true;
