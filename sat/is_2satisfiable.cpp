@@ -129,7 +129,7 @@ bool is_2satisfiable(const std::size_t N, const std::vector<Clause>& clauses)
 	}
 	// kosaraju function will return SCC ID's of individual nodes
 	auto SCC_IDs = graph.kosaraju();
-	for(std::size_t i=0; i<N; ++i)
+	for(std::size_t i=0; i<2*N; i+=2)
 	{	// if two consecutive nodes share the same ID, meaning, same SCC, it is unsat
 		if(SCC_IDs[i] == SCC_IDs[i + 1])
 		{
