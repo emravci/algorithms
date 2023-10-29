@@ -10,7 +10,8 @@
 struct Edge
 {	// v is the head of directed edge
 	// w is the weight of that edge
-	long long v, w;
+	std::size_t v;
+	long long w;
 	bool operator()(const Edge& lhs, const Edge& rhs)
 	{	// this function is intended for min-heap data structure
 		return lhs.w > rhs.w;
@@ -18,7 +19,7 @@ struct Edge
 };
 
 
-long long dijkstra(const std::vector<std::vector<Edge>>& adj_list, const long long s, const long long t)
+std::vector<double> dijkstra(const std::vector<std::vector<Edge>>& adj_list, const std::size_t s)
 {	// runs in O(m lgn) time due to min heap data structure
 	std::priority_queue<Edge, std::vector<Edge>, Edge> q;
 	std::size_t V = adj_list.size();
@@ -45,17 +46,15 @@ long long dijkstra(const std::vector<std::vector<Edge>>& adj_list, const long lo
 			}
 		}
 	}
-	return static_cast<long long>(cost[t]);
+	return cost;
 }
 
 int main() 
 {
-	// the vertex count is given
-	int V = 200;
-  	// file is 1-based
-	std::ifstream file("dijkstraData.txt");
+	std::ifstream file("dijkstraData.txt");							// 1 based
+	std::size_t V;
+	file >> V;
 	std::string line;
-  	// adjacency list is 0-based
 	std::vector<std::vector<Edge>> adj_list(V, std::vector<Edge>());
 	while(file.eof() == false)
 	{	// each row starts with the tail vertex
@@ -68,13 +67,13 @@ int main()
 		char comma = ',';
 		while(buffer >> edge.v >> comma >> edge.w)
 		{
-			--edge.v;											
-			adj_list[u - 1].push_back(edge);				
+			--edge.v;												// 0 based
+			adj_list[u - 1].push_back(edge);						// 0 based
 		}
 	}
 	file.close();
 	// compute shortest path distance from s to t 
-	long long s = 0, t = 6;										
-	std::cout << dijkstra(adj_list, s, t) << "\n";			
+	long long s = 0, t = 6;											// 0 based
+	std::cout << dijkstra(adj_list, s)[t] << "\n";					// 0 based	
 	return 0;
 }
