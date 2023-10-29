@@ -133,9 +133,29 @@ bool Clause::compute(const std::vector<Clause>& clauses, const std::vector<bool>
 	return true;
 }
 
-// to increase readability, a struct with members is_satisfiable of type bool, variables of type std::vector<bool>
-// can be created and used instead of std::pair
-std::pair<bool, std::vector<bool>> solve_2SAT(const std::size_t N, const std::vector<Clause>& clauses)
+struct Solution2SAT : std::pair<bool, std::vector<bool>>
+{
+	using pair_type = std::pair<bool, std::vector<bool>>;
+	Solution2SAT(bool _is_2satifiable, const std::vector<bool>& _variables)	:	pair_type{_is_2satifiable, _variables}		{}
+	bool& is_2satifiable()
+	{
+		return this->first;
+	}
+	const bool& is_2satifiable() const
+	{
+		return this->first;
+	}
+	std::vector<bool>& variables()
+	{
+		return this->second;
+	}
+	const std::vector<bool>& variables() const
+	{
+		return this->second;
+	}
+};
+
+Solution2SAT solve_2SAT(const std::size_t N, const std::vector<Clause>& clauses)
 {	// for reference, please see https://cp-algorithms.com/graph/2SAT.html
 	// there are N variables and
 	// there needs to be two nodes for each variable (one for 'x' and one for 'not x')
@@ -181,10 +201,9 @@ int main()
 		}
 		file.close();
 		// solve_2SAT returns pair with the first indicating whether it is satisfiable or not 
-		// however, for simplicity, here only second of the pair is retrieved to be used with compute fcn
+		// however, for simplicity, here only 'variables' is retrieved to be used with compute fcn
 		// since when clauses are UNSAT, it should compute false for any inputs anyway
-		// instead of .second, std::get<1> could be used, too
-		std::cout << Clause::compute(clauses, solve_2SAT(N, clauses).second);
+		std::cout << Clause::compute(clauses, solve_2SAT(N, clauses).variables());
 	}
 	std::cout << "\n";
 	auto stop = std::chrono::high_resolution_clock::now();
