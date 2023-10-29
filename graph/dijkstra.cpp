@@ -66,14 +66,14 @@ int main()
 		buffer >> u;
 		char comma = ',';
 		while(buffer >> edge.v >> comma >> edge.w)
-		{
-			--edge.v;												// 0 based
-			adj_list[u - 1].push_back(edge);						// 0 based
+		{	// adj list is 0-based
+			--edge.v;									
+			adj_list[u - 1].push_back(edge);						
 		}
 	}
 	file.close();
-	// compute shortest path distance from s to t 
-	long long s = 0, t = 6;											// 0 based
-	std::cout << dijkstra(adj_list, s)[t] << "\n";					// 0 based	
+	// compute shortest path distance from s to t (0-based)
+	long long s = 0, t = 6;									
+	std::cout << dijkstra(adj_list, s)[t] << "\n";				
 	return 0;
 }
