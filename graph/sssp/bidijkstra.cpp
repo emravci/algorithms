@@ -35,6 +35,7 @@ class Graph
 	representation_type adj_list;
 	representation_type rev_adj_list;
 	void explore(const std::size_t, const std::vector<Edge>&, std::vector<double>&, priority_queue_type&) const;
+	double shortest_distance(const std::vector<bool>&, const std::vector<bool>&, const std::vector<double>&, const std::vector<double>&) const;
 };
 
 void Graph::explore(const std::size_t curr, const std::vector<Edge>& neighbours, std::vector<double>& cost, priority_queue_type& pq) const
@@ -50,6 +51,20 @@ void Graph::explore(const std::size_t curr, const std::vector<Edge>& neighbours,
 	}
 }
 
+double Graph::shortest_distance(const std::vector<bool>& fwd_visited, const std::vector<bool>& bwd_visited, const std::vector<double>& fwd_cost, const std::vector<double>& bwd_cost) const
+{
+	const std::size_t V = adj_list.size();
+	double distance = std::numeric_limits<double>::infinity();
+	for(std::size_t v=0; v<V; ++v)
+	{
+		if((fwd_visited[v] == true) || (bwd_visited[v] == true))
+		{
+			distance = std::min(distance, fwd_cost[v] + bwd_cost[v]);
+		}
+	}
+	return distance;
+}
+
 double Graph::bidijkstra(const std::size_t s, const std::size_t t) const
 {	// solves shortest path of road networks between two nodes in half time of dijkstra's algorithm in O(m lgn)
 	const std::size_t V = adj_list.size();
@@ -60,8 +75,8 @@ double Graph::bidijkstra(const std::size_t s, const std::size_t t) const
 	// create forward and backward cost vectors
 	std::vector<double> fwd_cost(V, inf);
 	std::vector<double> bwd_cost(V, inf);
-	fwd_cost[s] = 0;
-	bwd_cost[t] = 0;
+	fwd_cost[s] = 0.;
+	bwd_cost[t] = 0.;
 	// create forward and backward priority queues (min heap)
 	priority_queue_type fwd_pq;
 	priority_queue_type bwd_pq;
@@ -74,17 +89,17 @@ double Graph::bidijkstra(const std::size_t s, const std::size_t t) const
 		{	// forward step
 			auto fwd = fwd_pq.top().head;
 			fwd_pq.pop();
-			fwd_visited[fwd] = true;
-			if(bwd_visited[fwd] == true)					return std::min(fwd_cost[fwd] + bwd_cost[fwd], fwd_cost[t]);
 			explore(fwd, adj_list[fwd], fwd_cost, fwd_pq);
+			fwd_visited[fwd] = true;
+			if(bwd_visited[fwd] == true)					return shortest_distance(fwd_visited, bwd_visited, fwd_cost, bwd_cost);
 		}
 		if(bwd_pq.empty() == false)
 		{	// backward step
 			auto bwd = bwd_pq.top().head;
 			bwd_pq.pop();
+			explore(bwd, rev_adj_list[bwd], bwd_cost, bwd_pq);
 			bwd_visited[bwd] = true;
-			if(fwd_visited[bwd] == true)					return std::min(fwd_cost[bwd] + bwd_cost[bwd], bwd_cost[s]);
-			explore(bwd, rev_adj_list[bwd], bwd_cost, bwd_pq);	
+			if(fwd_visited[bwd] == true)					return shortest_distance(fwd_visited, bwd_visited, fwd_cost, bwd_cost);
 		}
 	}	// when while loop is broken due to condition, there is no s - t path
 	return inf;
