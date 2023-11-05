@@ -75,7 +75,7 @@ double Graph::bidijkstra(const std::size_t s, const std::size_t t) const
 			auto fwd = fwd_pq.top().head;
 			fwd_pq.pop();
 			fwd_visited[fwd] = true;
-			if(bwd_visited[fwd] == true)					return fwd_cost[fwd] + bwd_cost[fwd];
+			if(bwd_visited[fwd] == true)					return std::min(fwd_cost[fwd] + bwd_cost[fwd], fwd_cost[t]);
 			explore(fwd, adj_list[fwd], fwd_cost, fwd_pq);
 		}
 		if(bwd_pq.empty() == false)
@@ -83,7 +83,7 @@ double Graph::bidijkstra(const std::size_t s, const std::size_t t) const
 			auto bwd = bwd_pq.top().head;
 			bwd_pq.pop();
 			bwd_visited[bwd] = true;
-			if(fwd_visited[bwd] == true)					return fwd_cost[bwd] + bwd_cost[bwd];
+			if(fwd_visited[bwd] == true)					return std::min(fwd_cost[bwd] + bwd_cost[bwd], bwd_cost[s]);
 			explore(bwd, rev_adj_list[bwd], bwd_cost, bwd_pq);	
 		}
 	}	// when while loop is broken due to condition, there is no s - t path
