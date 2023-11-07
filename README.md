@@ -8,6 +8,7 @@ The algorithm runs in O(nW) time, where n is the number of items and W is the kn
 ### johnson.cpp
 ## minimum spanning tree as mst
 ### kruskal.cpp
+The algorithm runs in O(m lgm) time due to sorting the edges. Edges are included one by one in increasing weights provided that the prospective edge does not form a cycle, which cannot exist in a minimum spanning tree. Different from majority of the algorithm here, this one makes use of disjoint-set data structure, also known as union-find data structure. In order not to exceed running time of sorting, in this data structure, union  by rank and also path compression techniques are used.
 ### prim.cpp
 Prim's algorithm runs in O(m lgn) time, when heap data structure is used. The algorithm works only for undirected graphs.
 ## strongly connected components as scc
